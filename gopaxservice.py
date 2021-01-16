@@ -3,12 +3,9 @@ import base64, hashlib, hmac, json, requests, time
 Python wrapper for the GOPAX REST API
 """
 class GopaxService():
-    def __init__(self):
-        #TODO: Make key info more secure
-        auth_file = open('auth.json')
-        auth_data = json.load(auth_file)
-        self.secret_key = auth_data['secret_key']
-        self.api_key = auth_data['api_key']
+    def __init__(self,secret_key,api_key):
+        self.secret_key = secret_key
+        self.api_key = api_key
     def call(self, need_auth, method, path, body_json=None, recv_window=None):
         #Brought from offical GOPAX API document
         method = method.upper()
