@@ -56,5 +56,6 @@ class GopaxService():
             'side': 'buy', 'type': 'market', 'amount': amount_krw,
             'price': 0, 'tradingPairName': coin_name
         }
-        return self.call(True, 'POST', '/orders', post_orders_req_body, 200)
+        response = self.call(True, 'POST', '/orders', post_orders_req_body, 200)
+        return response
 
