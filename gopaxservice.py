@@ -33,7 +33,6 @@ class GopaxService():
 
 
     """ Private APIs 
-    
         Private APIs need authentication
     """
 
@@ -50,38 +49,42 @@ class GopaxService():
     def get_order_by_id(self, order_id:int):
         response = self.call(True,'Get',f'/orders/{order_id}')
         return response
-    def place_order(self,client_order_id = None, trading_pair_name:str, side:str, type:str, price, stop_price = None, amount, protection:bool = False, time_in_force:str = "gtc"):
-        #TODO:The arguments are incomplete - needs to be filled in
+    def place_order(self,client_order_id = None, trading_pair_name:str, side:str, order_type:str, price, stop_price = None,\
+                    amount, protection:bool = False, time_in_force:str = "gtc"):
         post_orders_req_body = {
-            'side': 'buy', 'type': 'market', 'amount': amount_krw,
-            'price': 0, 'tradingPairName': coin_name
+            "clientOrderId": client_order_id,       # opt. | client order ID (max 20 characters of [a-zA-Z0-9_-])
+            "tradingPairName": trading_pair_name,   # man. | order book
+            "side": side,                           # man. | buy, sell
+            "type": order_type,                     # man. | limit, market
+            "price": price,                         # man. (only for limit) | price
+            "stopPrice": stop_price,                # opt. (becomes a stop order if set) | stop price
+            "amount": amount,                       # man. | amount
+            "protection": protection,               # opt. (default=no) | whether protection is activated (yes or no)
+            "timeInForce": time_in_force            # opt. (default=gtc) | limit order's time in force (gtc/po/ioc/fok)``
         }
         response = self.call(True, 'POST', '/orders', post_orders_req_body, 200)
         return response
-    def buy_with_krw_market(self,coin_name:str,amount_krw:int):
-        self.place_order('buy','market',)
 
     def cancel_order(self,order_id:int):
         response = self.call(True,'Delete',f'/orders/{order_id}')
         return response
 
-    def get_balance_by_asset(self):
-        response = self.call(False,'Get','/balances')
+    def get_trading_history(self):
+        response = self.call(False,'Get','/trades')
         return response
-    def get_balance_by_asset(self):
-        response = self.call(False,'Get','/balances')
+    def get_deposit_withdrawal_status(self):
+        response = self.call(False,'Get','/deposit-withdrawal-status')
         return response
-    def get_balance_by_asset(self):
-        response = self.call(False,'Get','/balances')
+    def get_crypto-deposit-addresses(self):
+        response = self.call(False,'Get','/crypto-deposit-addresses')
         return response
-    def get_balance_by_asset(self):
-        response = self.call(False,'Get','/balances')
-        return response
-    def get_balance_by_asset(self):
-        response = self.call(False,'Get','/balances')
+    def get_crypto-withdrawal-addresses(self):
+        response = self.call(False,'Get','/crypto-withdrawal-addresses')
         return response
         
-    #NOTCOMPLETEEND
+    """ Public APIs
+        Public APIs don't need authentication. There is no need to set headers
+    """
     def get_chart_data(self,coin_name:str, start_timestamp:int, end_timestamp: int, stick_interval: int):
         """ timestamps are in milliseconds, stick_interval is in minutes and should be one of 1,5,30,1440"""
         response = self.call(False,'Get',f'/trading-pairs/{coin_name}/candles?start={start_timestamp}&end={end_timestamp}&interval={stick_interval}')
