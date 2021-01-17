@@ -31,23 +31,26 @@ class GopaxService():
             'header': dict(resp.headers),
         }
 
-    def get_chart_data(self,coin_name:str, start_timestamp:int, end_timestamp: int, stick_interval: int):
-        """ timestamps are in milliseconds, stick_interval is in minutes and should be one of 1,5,30,1440"""
-        response = self.call(False,'Get',f'/trading-pairs/{coin_name}/candles?start={start_timestamp}&end={end_timestamp}&interval={stick_interval}')
+
+    """ Private APIs 
+    
+        Private APIs need authentication
+    """
+
+    def get_balance(self):
+        response = self.call(False,'Get','/balances')
+        return response
+    #NOTCOMPLETESTART
+    def get_balance_by_asset(self, asset_name:str):
+        response = self.call(False,'Get',f'/balances/{asset_name}')
         return response
     def get_orders(self):
         response = self.call(True,'Get','/orders')
         return response
-    def get_server_time(self):
-        response = self.call(False,'Get','/time')
+    def get_order_by_id(self, order_id:int):
+        response = self.call(True,'Get',f'/orders/{order_id}')
         return response
-    def get_stats(self,coin_name:str):
-        response = self.call(False,'Get',f'/trading-pairs/{coin_name}/stats')
-        return response
-    def cancel_order(self,order_id:int):
-        response = self.call(True,'Delete',f'/orders/{order_id}')
-        return response
-    def place_order(self,coin_name:str, amount_krw:int):
+    def place_order(self,client_order_id = None, trading_pair_name:str, side:str, type:str, price, stop_price = None, amount, protection:bool = False, time_in_force:str = "gtc"):
         #TODO:The arguments are incomplete - needs to be filled in
         post_orders_req_body = {
             'side': 'buy', 'type': 'market', 'amount': amount_krw,
@@ -55,4 +58,37 @@ class GopaxService():
         }
         response = self.call(True, 'POST', '/orders', post_orders_req_body, 200)
         return response
+    def buy_with_krw_market(self,coin_name:str,amount_krw:int):
+        self.place_order('buy','market',)
 
+    def cancel_order(self,order_id:int):
+        response = self.call(True,'Delete',f'/orders/{order_id}')
+        return response
+
+    def get_balance_by_asset(self):
+        response = self.call(False,'Get','/balances')
+        return response
+    def get_balance_by_asset(self):
+        response = self.call(False,'Get','/balances')
+        return response
+    def get_balance_by_asset(self):
+        response = self.call(False,'Get','/balances')
+        return response
+    def get_balance_by_asset(self):
+        response = self.call(False,'Get','/balances')
+        return response
+    def get_balance_by_asset(self):
+        response = self.call(False,'Get','/balances')
+        return response
+        
+    #NOTCOMPLETEEND
+    def get_chart_data(self,coin_name:str, start_timestamp:int, end_timestamp: int, stick_interval: int):
+        """ timestamps are in milliseconds, stick_interval is in minutes and should be one of 1,5,30,1440"""
+        response = self.call(False,'Get',f'/trading-pairs/{coin_name}/candles?start={start_timestamp}&end={end_timestamp}&interval={stick_interval}')
+        return response
+    def get_server_time(self):
+        response = self.call(False,'Get','/time')
+        return response
+    def get_stats(self,coin_name:str):
+        response = self.call(False,'Get',f'/trading-pairs/{coin_name}/stats')
+        return response
