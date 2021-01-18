@@ -2,6 +2,8 @@ import base64, hashlib, hmac, json, requests, time
 """
 Python wrapper for the GOPAX REST API
 """
+#TODO Find a function that deals with query_string using a python library (url?) and make the codes more concise
+#TODO Add comments for argument and query string info
 class GopaxService():
     def __init__(self,secret_key,api_key):
         self.secret_key = secret_key
@@ -48,6 +50,9 @@ class GopaxService():
     def get_order_by_id(self, order_id:int):
         response = self.call(True,'Get',f'/orders/{order_id}')
         return response
+    def get_order_by_client_order_id(self, client_order_id:int):
+        response = self.call(True,'Get',f'/orders/clientOrderId/{client_order_id}')
+        return response
     def place_order(self,client_order_id = None, trading_pair_name:str, side:str, order_type:str, price, stop_price = None,\
                     amount, protection:bool = False, time_in_force:str = "gtc"):
         post_orders_req_body = {
@@ -68,11 +73,54 @@ class GopaxService():
         response = self.call(True,'Delete',f'/orders/{order_id}')
         return response
 
-    def get_trading_history(self):
+    def get_trading_history(self, limit = None, pastmax = None, latestmin = None, after = None, before = None, deep_search = None):
         response = self.call(False,'Get','/trades')
+        path_str = '/trades'
+        query_string_exists = False
+        query_string = ''
+        if limit is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'limit={limit}' 
+            query_string_exists = True
+        if pastmax is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'pastmax={pastmax}' 
+            query_string_exists = True
+        if latestmin is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'latestmin={latestmin}' 
+            query_string_exists = True
+        if after is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'after={after}' 
+            query_string_exists = True
+        if before is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'before={before}' 
+            query_string_exists = True
+        if deep_search is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'deepSearch={deep_search}' 
+            query_string_exists = True
+        if query_string_exists: path_str += query_string
+        response = self.call(False,'Get', path_str)
         return response
-    def get_deposit_withdrawal_status(self):
+    def get_deposit_withdrawal_status(self, limit = None, latestmin = None, after = None, before = None, completed_only = None):
         response = self.call(False,'Get','/deposit-withdrawal-status')
+        path_str = '/deposit-withdrawal-status'
+        query_string_exists = False
+        query_string = ''
+        if limit is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'limit={limit}' 
+            query_string_exists = True
+        if latestmin is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'latestmin={latestmin}' 
+            query_string_exists = True
+        if after is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'after={after}' 
+            query_string_exists = True
+        if before is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'before={before}' 
+            query_string_exists = True
+        if completed_only is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'completedOnly={completed_only}' 
+            query_string_exists = True
+        if query_string_exists: path_str += query_string
+        response = self.call(False,'Get', path_str)
         return response
     def get_crypto-deposit-addresses(self):
         response = self.call(False,'Get','/crypto-deposit-addresses')
@@ -84,13 +132,71 @@ class GopaxService():
     """ Public APIs
         Public APIs don't need authentication. There is no need to set headers
     """
-    def get_chart_data(self,coin_name:str, start_timestamp:int, end_timestamp: int, stick_interval: int):
+    def get_asssets(self):
+        response = self.call(False,'Get','/assets')
+        return response
+    def get_trading_pair(self):
+        response = self.call(False,'Get','/trading-pairs')
+        return response
+    def get_price_tick_size(self, trading_pair:str):
+        response = self.call(False,'Get',f'/trading-pairs/{trading_pair}/price-tick-size')
+        return response
+    def get_ticker(self, trading_pair:str):
+        response = self.call(False,'Get',f'/trading-pairs/{trading_pair}/ticker')
+        return response
+    def get_order_book(self, trading_pair:str, level = None):
+        response = self.call(False,'Get',f'/trading-pairs/{trading_pair}/book'+(f'?level={level}' if level is not None else ''))
+        return response
+    def get_trading_history(self, trading_pair:str, limit = None, pastmax = None, latestmin = None, after = None, before = None):
+        path_str = f'/trading-pairs/{trading_pair}/trades'
+        query_string_exists = False
+        query_string = ''
+        if limit is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'limit={limit}' 
+            query_string_exists = True
+        if pastmax is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'pastmax={pastmax}' 
+            query_string_exists = True
+        if latestmin is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'latestmin={latestmin}' 
+            query_string_exists = True
+        if after is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'after={after}' 
+            query_string_exists = True
+        if before is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'before={before}' 
+            query_string_exists = True
+        if query_string_exists: path_str += query_string
+        response = self.call(False,'Get', path_str)
+        return response
+    def get_statistics(self, trading_pair:str):
+        response = self.call(False,'Get',f'/trading-pairs/{trading_pair}/stats')
+        return response
+    def get_all_statistics(self):
+        response = self.call(False,'Get','/trading-pairs/stats')
+    def get_chart_data(self,trading_pair:str, start_timestamp:int, end_timestamp: int, stick_interval: int):
         """ timestamps are in milliseconds, stick_interval is in minutes and should be one of 1,5,30,1440"""
-        response = self.call(False,'Get',f'/trading-pairs/{coin_name}/candles?start={start_timestamp}&end={end_timestamp}&interval={stick_interval}')
+        response = self.call(False,'Get',f'/trading-pairs/{trading_pair}/candles?start={start_timestamp}&end={end_timestamp}&interval={stick_interval}')
         return response
     def get_server_time(self):
         response = self.call(False,'Get','/time')
         return response
-    def get_stats(self,coin_name:str):
-        response = self.call(False,'Get',f'/trading-pairs/{coin_name}/stats')
+    def get_notices(self, limit = None, page = None, notice_type = None, notice_format = None):
+        path_str = '/notices'
+        query_string_exists = False
+        query_string = ''
+        if limit is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'limit={limit}' 
+            query_string_exists = True
+        if page is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'page={page}' 
+            query_string_exists = True
+        if notice_type is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'type={notice_type}' 
+            query_string_exists = True
+        if notice_format is not None: 
+            query_string += ('&' if query_string_exists else '?') + f'format={notice_format}' 
+            query_string_exists = True
+        if query_string_exists: path_str += query_string
+        response = self.call(False,'Get', path_str)
         return response
