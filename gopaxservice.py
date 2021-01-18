@@ -39,7 +39,6 @@ class GopaxService():
     def get_balance(self):
         response = self.call(False,'Get','/balances')
         return response
-    #NOTCOMPLETESTART
     def get_balance_by_asset(self, asset_name:str):
         response = self.call(False,'Get',f'/balances/{asset_name}')
         return response
